@@ -4,11 +4,12 @@
 #include "Mp_menusConst.h"
 #include <MemoryFree.h>
 
+#define MENU_MAX_LVL 5
+
 class Menu
 {
 
 public:
-    Menu();
     Menu(bool OffTimer);
     ~Menu();
 
@@ -16,12 +17,13 @@ public:
 
     bool optionChanging(bool revers); // переключение опции
 
-    bool isActive();                      // возвращает menuOn - статус меню (активно/спит)
+    bool isActive();         // возвращает menuOn - статус меню (активно/спит)
 
     bool getChangStatus(); // возращает true если была смена опции и переводит этот ключь в false
     bool activation();
     bool setCheckedOption(byte option);
     bool getIsMenuTimerEnd();
+    void setLevelsCheckedOption(byte lvl, byte option);
 
     unsigned int getOptionBild(byte option);
     unsigned int getMenuToOpen(byte option); 
@@ -45,8 +47,10 @@ public:
     void deleteOptions();
     bool menuOpen();
     bool menuClose();
+    void setMenuLvl(byte lvl);
+    
     byte menuLevel = 0;
-    byte menuOption[5];
+    byte menuOption[MENU_MAX_LVL];
     // void createMenu();
     void menuFromPRGMEM();
 
@@ -56,6 +60,7 @@ public:
     static unsigned int getHighLvlMenuNum(unsigned int index);
 
     // переменные
+    Timer *menuOffTimer = nullptr;
     // bool customKey1 = false; // зарезервированный ключь для внешнего использования
 
 private:
@@ -66,7 +71,7 @@ private:
     byte optionsCount;
 
     Timer menuTimer = Timer(300);
-    Timer *menuOffTimer = nullptr;
+    
     bool changed;
     bool OffTimerIsOn;
     bool thirstDraw;

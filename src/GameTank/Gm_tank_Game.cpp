@@ -4,55 +4,308 @@
 namespace Tank
 {
 
-    Game::Game()
+    GameTank::GameTank()
     {
-        ai[0] = nullptr;
-        for (byte i = 1; i < MAX_TANK_COUNT; i++)
+        gameInitialil();
+        gameStarted = false;
+        gameScreen = 0;
+        gfx.drawScr();
+        delay(300);
+    }
+
+    GameTank::~GameTank()
+    {
+        gameEnd();
+        if (menu != nullptr)
+        {
+            delete menu;
+            menu = nullptr;
+        }
+        delay(300);
+    }
+
+    void GameTank::gameInitialil()
+    {
+        menu = nullptr;
+        for (byte i = 0; i < MAX_TANK_COUNT; i++)
         {
 
             tank[i] = nullptr;
             ai[i] = nullptr;
         }
-        for (byte i = 1; i <= 3; i++)
-        {
-            tank[i] = new Tank(50, (i - 1) * 20, LEFT, 2, 2);
-            ai[i] = new Ai(*tank[i]);
-        }
-        tank[0] = new Tank(0, 20, RIGHT, 1, 5);
+
         for (byte i = 0; i < CANNON1_MAX; i++)
         {
             shell1[i] = nullptr;
         }
-        tank[0] = new Tank(0, 20, RIGHT, 1, 5);
 
         for (byte i = 0; i < CANNON2_MAX; i++)
         {
             shell2[i] = nullptr;
         }
 
-        shell1[1] = nullptr;
-        for (byte i = 0; i < 10; i++)
+        for (byte i = 0; i < MAX_EXPLOSIONS; i++)
         {
             expl[i] = nullptr;
         }
     }
 
-    void Game::mainLoop()
+    void GameTank::menuHandler()
     {
-        // btnsListener();
-        tank[0]->shootTimer.tick();
+        menudraw = false;
+        if (menu == nullptr)
+        {
+            menuCreate();
+            if (gameStarted)
+            {
+
+                gfx.drawPauseMenu(menu->getCheckedOption());
+                gfx.drawScr();
+            }
+            else
+            {
+                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCount);
+                gfx.drawScr();
+            }
+        }
+        menu->menuTimersTick();
+
+        if (btn_rt.btnState() || btn_lt.btnState())
+        {
+            menudraw = menu->optionChanging(btn_lt.btnState());
+        }
+        if (btn_up.btnState() || btn_dn.btnState())
+        {
+            menudraw = menuOptionChange(btn_dn.btnState());
+        }
+        if (btn_st.btnState())
+        {
+            menuOptionActivation();
+        }
+        if (menudraw)
+        {
+            if (gameStarted)
+            {
+
+                gfx.drawPauseMenu(menu->getCheckedOption());
+                gfx.drawScr();
+            }
+            else
+            {
+                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCount);
+                gfx.drawScr();
+            }
+        }
+    }
+
+    bool GameTank::menuOptionChange(bool revers)
+    {
+        if (gameStarted)
+        {
+            return false;
+        }
+        if (menu->getCheckedOption() == 2)
+        {
+            if (menu->getTimerIsEnd())
+            {
+                menu->timerRestart();
+                lives = (revers) ? lives - 1 : lives + 1;
+                if (lives < 1)
+                {
+                    lives = 1;
+                }
+                if (lives > 5)
+                {
+                    lives = 5;
+                }
+                return true;
+            }
+        }
+        if (menu->getCheckedOption() == 3)
+        {
+            if (menu->getTimerIsEnd())
+            {
+                menu->timerRestart();
+                enemysCount = (revers) ? enemysCount - 1 : enemysCount + 1;
+                if (enemysCount < 1)
+                {
+                    enemysCount = 1;
+                }
+                if (enemysCount > 5)
+                {
+                    enemysCount = 5;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void GameTank::menuCreate()
+    {
+        if (menu != nullptr)
+        {
+            return;
+        }
+        menu = new Menu;
+        if (gameStarted)
+        {
+            menu->addOption(2);
+        }
+        else
+        {
+            menu->addOption(4);
+        }
+    }
+
+    void GameTank::menuOptionActivation()
+    {
+        if (gameStarted)
+        {
+            switch (menu->getCheckedOption())
+            {
+            case 1:
+                gameResume();
+                break;
+            case 2:
+                gameEnd();
+                break;
+            }
+        }
+        else
+        {
+            switch (menu->getCheckedOption())
+            {
+            case 1:
+                gameStart();
+                break;
+            case 4:
+                gameExit();
+                break;
+            }
+        }
+    }
+
+    void GameTank::gameStart()
+    {
+        if (menu != nullptr)
+        {
+            delete menu;
+            menu = nullptr;
+        }
+        tank[0] = new Tank(0, 20, RIGHT, 1, 2);
+        for (byte i = 1; i <= enemysCount; i++)
+        {
+            tank[i] = new Tank(50, (i - 1) * 20, LEFT, 2, 2);
+            ai[i] = new Ai(*tank[i]);
+        }
+        delay(500);
+        gameScreen = 1;
+        gameStarted = true;
+        frameTimer.timerStart();
+    }
+
+    void GameTank::gamePause()
+    {
+        frameTimer.timerStop();
+        gameScreen = 0;
+        delay(300);
+    }
+
+    void GameTank::gameResume()
+    {
+        if (menu != nullptr)
+        {
+            delete menu;
+            menu = nullptr;
+        }
+        delay(500);
+        frameTimer.timerStart();
+        gameScreen = 1;
+    }
+
+    void GameTank::gameEnd()
+    {
+        if (menu != nullptr)
+        {
+            delete menu;
+            menu = nullptr;
+        }
+        frameTimer.timerStop();
+        gameStarted = false;
+        gameScreen = 0;
+
+        for (byte i = 0; i < MAX_TANK_COUNT; i++)
+        {
+            if (tank[i] != nullptr)
+            {
+                delete tank[i];
+                tank[i] = nullptr;
+            }
+            if (ai[i] != nullptr)
+            {
+                delete ai[i];
+                ai[i] = nullptr;
+            }
+        }
+
+        for (byte i = 0; i < CANNON1_MAX; i++)
+        {
+            if (shell1[i] != nullptr)
+            {
+                delete shell1[i];
+                shell1[i] = nullptr;
+            }
+        }
+
+        for (byte i = 0; i < CANNON2_MAX; i++)
+        {
+            if (shell2[i] != nullptr)
+            {
+                delete shell2[i];
+                shell2[i] = nullptr;
+            }
+        }
+
+        for (byte i = 0; i < MAX_EXPLOSIONS; i++)
+        {
+            if (expl[i] != nullptr)
+            {
+                delete expl[i];
+                expl[i] = nullptr;
+            }
+        }
+
+        delay(300);
+    }
+
+    void GameTank::gameExit()
+    {
+        exit = true;
+        gameEnd();
+    }
+
+    void GameTank::mainLoop()
+    {
+        if (exit)
+        {
+            return;
+        }
+        if (gameScreen == 0)
+        {
+            menuHandler();
+            return;
+        }
 
         frameTimer.tick();
-
         if (frameTimer.isTimerEnd())
         {
-
             frameTimer.timerStart();
             gameStep();
         }
     }
 
-    void Game::drawScreen()
+    void GameTank::drawScreen()
     {
         for (byte i = 0; i < 10; i++)
         {
@@ -77,19 +330,20 @@ namespace Tank
             }
         }
 
-        for (byte i = 0; i < 10; i++)
+        for (byte i = 0; i < MAX_EXPLOSIONS; i++)
         {
             if (expl[i] != nullptr)
             {
                 gfx.drawExplosion(expl[i]->getX(), expl[i]->getY(), expl[i]->getImgNum());
             }
         }
+        gfx.drawBorder();
         gfx.drawScr();
     }
 
-    byte Game::findFreeShell(byte max)
+    byte GameTank::findFreeShell()
     {
-        for (byte i = 0; i < max; i++)
+        for (byte i = 0; i < CANNON1_MAX; i++)
         {
             if (shell1[i] == nullptr)
             {
@@ -98,14 +352,25 @@ namespace Tank
         }
         return 254;
     }
+    byte GameTank::findFreeEnemysShell()
+    {
+        for (byte i = 0; i < CANNON2_MAX; i++)
+        {
+            if (shell2[i] == nullptr)
+            {
+                return i;
+            }
+        }
+        return 254;
+    }
 
-    void Game::tankControl()
+    void GameTank::tankControl()
     {
         if (btn_st.btnState())
         {
             if (tank[0]->shoot())
             {
-                byte a = findFreeShell(CANNON1_MAX);
+                byte a = findFreeShell();
                 if (a != 254)
                 {
                     shell1[a] = new cannonShell(tank[0]->getCannonStartX(), tank[0]->getCannonStartY(), tank[0]->getMovement());
@@ -130,7 +395,7 @@ namespace Tank
         enemysControl();
     }
 
-    void Game::enemysControl()
+    void GameTank::enemysControl()
     {
         for (byte i = 1; i < 10; i++)
         {
@@ -156,10 +421,9 @@ namespace Tank
                 tank[i]->setposLock(false);
                 if (ai[i]->getShoot() == 1)
                 {
-
                     if (tank[i]->shoot())
                     {
-                        byte a = findFreeShell(20);
+                        byte a = findFreeEnemysShell();
                         if (a != 254)
                         {
                             shell2TankNum[a] = i;
@@ -171,7 +435,12 @@ namespace Tank
         }
     }
 
-    bool Game::movmentBlockControl(byte TankNum)
+    bool GameTank::getExit()
+    {
+        return exit;
+    }
+
+    bool GameTank::movmentBlockControl(byte TankNum)
     {
         for (byte i = 0; i < MAX_TANK_COUNT; i++)
         {
@@ -211,7 +480,7 @@ namespace Tank
         return false;
     }
 
-    byte Game::hittingEnemys(byte i)
+    byte GameTank::hittingEnemys(byte i)
     {
         for (byte b = 1; b < 10; b++)
         {
@@ -250,7 +519,7 @@ namespace Tank
         return 0;
     }
 
-    bool Game::hittingPlayer(byte i)
+    bool GameTank::hittingPlayer(byte i)
     {
         if (tank[0] != nullptr)
         {
@@ -287,7 +556,7 @@ namespace Tank
         return false;
     }
 
-    bool Game::checkCollisionU(int x1, int y1, byte size1, int x2, int y2, byte size2)
+    bool GameTank::checkCollisionU(int x1, int y1, byte size1, int x2, int y2, byte size2)
     {
         if (y1 <= y2 + size2 && y1 >= y2)
         {
@@ -298,7 +567,7 @@ namespace Tank
         }
         return false;
     }
-    bool Game::checkCollisionD(int x1, int y1, byte size1, int x2, int y2, byte size2)
+    bool GameTank::checkCollisionD(int x1, int y1, byte size1, int x2, int y2, byte size2)
     {
         if (y1 + size1 >= y2 && y1 + size1 <= y2 + size2)
         {
@@ -309,7 +578,7 @@ namespace Tank
         }
         return false;
     }
-    bool Game::checkCollisionL(int x1, int y1, byte size1, int x2, int y2, byte size2)
+    bool GameTank::checkCollisionL(int x1, int y1, byte size1, int x2, int y2, byte size2)
     {
         if (x1 <= x2 + size2 && x1 >= x2)
         {
@@ -320,7 +589,7 @@ namespace Tank
         }
         return false;
     }
-    bool Game::checkCollisionR(int x1, int y1, byte size1, int x2, int y2, byte size2)
+    bool GameTank::checkCollisionR(int x1, int y1, byte size1, int x2, int y2, byte size2)
     {
         if (x1 + size1 >= x2 && x1 + size1 <= x2 + size2)
         {
@@ -332,10 +601,10 @@ namespace Tank
         return false;
     }
 
-    void Game::explosionsControl()
+    void GameTank::explosionsControl()
     {
 
-        for (byte i = 0; i < 10; i++)
+        for (byte i = 0; i < MAX_EXPLOSIONS; i++)
         {
             if (expl[i] != nullptr && expl[i]->isFinished())
             {
@@ -346,7 +615,7 @@ namespace Tank
         }
     }
 
-    void Game::cannonControl()
+    void GameTank::cannonControl()
     {
 
         for (byte i = 0; i < CANNON1_MAX; i++)
@@ -400,7 +669,7 @@ namespace Tank
             {
                 if (shell2[i]->getExplosed())
                 {
-                    if (explosionsCount < 10)
+                    if (explosionsCount < MAX_EXPLOSIONS)
                     {
                         explosionsCount++;
                         expl[findFreeExpl()] = new Explosion(shell2[i]->getX(), shell2[i]->getY(), true);
@@ -429,9 +698,9 @@ namespace Tank
         }
     }
 
-    byte Game::findFreeExpl()
+    byte GameTank::findFreeExpl()
     {
-        for (byte i = 0; i < 10; i++)
+        for (byte i = 0; i < MAX_EXPLOSIONS; i++)
         {
             if (expl[i] == nullptr)
             {
@@ -441,14 +710,13 @@ namespace Tank
         return 254;
     }
 
-    void Game::gameStep()
+    void GameTank::gameStep()
     {
+        tank[0]->shootTimer.tick();
         drawScreen();
         tankControl();
         explosionsControl();
-
         cannonControl();
-
         for (byte i = 1; i < MAX_TANK_COUNT; i++)
         {
             if (ai[i] != nullptr)
@@ -456,15 +724,10 @@ namespace Tank
                 ai[i]->steper();
             }
         }
-    }
+        if (btn_esc.btnState())
+        {
 
-    void Game::btnsListener()
-    {
-        btn_lt.buttonListener();
-        btn_rt.buttonListener();
-        btn_dn.buttonListener();
-        btn_up.buttonListener();
-        btn_st.buttonListener();
+            gamePause();
+        }
     }
-
 }

@@ -1,6 +1,6 @@
 #include "Mp_MainControl.h"
 
-MainControl::MainControl() : screen(SCR_MAIN), stateTimer(300)
+MainControl::MainControl() : screen(SCR_MAIN), stateTimer(300), SleepTimer(15000)
 {
 
   gfx = new Gfx();
@@ -8,14 +8,22 @@ MainControl::MainControl() : screen(SCR_MAIN), stateTimer(300)
 
 void MainControl::mainLoop()
 {
+  SleepTimer.tick();
   stateTimer.tick();
   keyboardListener();
   switch (screen)
   {
-  case SCR_GAME_TANK:
-  //Serial.println (screen);
+  case SCR_GAME:
 
-    gameTank->mainLoop();
+    if (game != nullptr)
+    {
+      game->mainLoop();
+    }
+    if (game->getExit())
+    {
+      gameExit();
+    }
+
     break;
 
   case SCR_MAIN:
@@ -42,11 +50,12 @@ void MainControl::handlerMainMenu()
   if (mainMenu == nullptr)
   {
 
-    mainMenu = new Menu();
-    mainMenu->setOffTimerOn(10000);
+    mainMenu = new Menu(true);
+    mainMenu->setOffTimerOn(6000);
     mainMenu->setMenuCode(MENU_MAIN);
     mainMenu->menuFromPRGMEM();
   }
+
   mainMenu->menuTimersTick();
   if (mainMenu->isA1stDraw())
   {
@@ -60,6 +69,14 @@ void MainControl::handlerMainMenu()
 
     unsigned int menuImg = mainMenu->getMenuImgNum(mainMenu->getMenuCode());
     gfx->drawMeinMenu(menuImg, i1, ia, i2);
+  }
+  if (!mainMenu->isActive())
+  {
+    screen = SCR_MAIN;
+    SleepTimer.timerStart();
+    delete mainMenu;
+    mainMenu = nullptr;
+    return;
   }
 
   if (btn_lt.btnState() || btn_rt.btnState())
@@ -83,12 +100,18 @@ void MainControl::handlerMainMenu()
       byte i2 = mainMenu->getOptionBild(a2);
       byte i0 = mainMenu->getOptionBild(a0);
 
+      
+      Serial.print(a1);Serial.print(" / ");
+      Serial.print(a);Serial.print(" / ");
+      Serial.print(a2);Serial.print(" / ");
+      Serial.println(a0);
+
       byte menuImg = mainMenu->getMenuImgNum(mainMenu->getMenuCode());
       gfx->drawMeinMenu(menuImg, i1, ia, i2, i0, true, revers);
     }
   }
 
-  if (btn_dn.btnState())
+  if (btn_st.btnState())
   {
     byte checkedOptionBild = mainMenu->getOptionBild(mainMenu->getCheckedOption());
     if (mainMenu->menuOpen())
@@ -100,11 +123,16 @@ void MainControl::handlerMainMenu()
 
       if (mainMenu->getIsMenuTimerEnd() && mainMenu->getFunctionToDo(mainMenu->getCheckedOption()) != 0)
       {
+        if (mainMenu->menuOffTimer != nullptr)
+        {
+          mainMenu->menuOffTimer->timerStart();
+        }
+
         funcSelector();
       }
     }
   }
-  if (btn_up.btnState())
+  if (btn_esc.btnState())
   {
     if (mainMenu->menuClose())
     {
@@ -120,6 +148,7 @@ void MainControl::handlerMainMenu()
         mainMenu = nullptr;
       }
       screenChange(SCR_MAIN);
+      SleepTimer.timerStart();
     }
   }
 }
@@ -131,38 +160,41 @@ void MainControl::handlerScreenOff()
     gfx->displayOff();
     isDisplayOn = false;
   }
-  if (btn_lt.btnState() || btn_rt.btnState() || btn_up.btnState())
+  if (btn_lt.btnState() || btn_rt.btnState() || btn_esc.btnState())
   {
     screenChange(SCR_MAIN);
+    SleepTimer.timerStart();
     isDisplayOn = true;
   }
-  else if (btn_dn.btnState())
+  else if (btn_st.btnState())
   {
     screenChange(SCR_CLOCK);
+    SleepTimer.timerStart();
     isDisplayOn = true;
-    for (unsigned int i = 0; i < 6; i++)
-    {
-      Serial.print(i);
-      Serial.print(" = ");
-      Serial.println(Menu::getMenuImgNum(i));
-    }
   }
 }
 
 void MainControl::handlerClock()
 {
+  if (SleepTimer.isTimerEnd())
+  {
+    drawKey = true;
+    screen = SCR_OFF;
+  }
   if (drawKey)
   {
     drawKey = false;
     gfx->drawClock();
+    SleepTimer.timerStart();
   }
 
-  if (btn_lt.btnState() || btn_rt.btnState() || btn_dn.btnState())
+  if (btn_lt.btnState() || btn_rt.btnState() || btn_st.btnState())
   {
     screenChange(SCR_MAIN);
+    SleepTimer.timerStart();
     drawKey = true;
   }
-  else if (btn_up.btnState())
+  else if (btn_esc.btnState())
   {
     screenChange(SCR_OFF);
     drawKey = true;
@@ -171,18 +203,25 @@ void MainControl::handlerClock()
 
 void MainControl::handlerMainScreen()
 {
+
+  if (SleepTimer.isTimerEnd())
+  {
+    screen = SCR_CLOCK;
+    drawKey = true;
+  }
   if (drawKey)
   {
     drawKey = false;
     gfx->drawMainScreen();
+    SleepTimer.timerStart();
   }
 
-  if (btn_up.btnState())
+  if (btn_esc.btnState())
   {
     drawKey = true;
     screenChange(SCR_OFF);
   }
-  else if (btn_dn.btnState())
+  else if (btn_st.btnState())
   {
     drawKey = true;
     screenChange(SCR_CLOCK);
@@ -213,6 +252,8 @@ void MainControl::keyboardListener()
   btn_dn.buttonListener();
   btn_up.buttonListener();
   btn_st.buttonListener();
+  btn_esc.buttonListener();
+  btn_md.buttonListener();
 }
 
 void MainControl::funcSelector()
@@ -279,8 +320,6 @@ void MainControl::funcHealing()
 void MainControl::funcGameStarter()
 {
   unsigned int gameNum = mainMenu->getCheckedOption();
-  Serial.print("mem= ");
-  Serial.println(freeMemory());
   if (mainMenu != nullptr)
   {
     delete mainMenu;
@@ -292,13 +331,39 @@ void MainControl::funcGameStarter()
     gfx = nullptr;
   }
 
-  screen = SCR_GAME_TANK;
-
-  if (gameTank == nullptr)
+  screen = SCR_GAME;
+  switch (gameNum)
   {
-    gameTank = new Tank::Game();
+  case 1:
+    if (game == nullptr)
+    {
+      game = new Tank::GameTank();
+    }
+    break;
+
+  default:
+    break;
+  }
+}
+
+void MainControl::gameExit()
+{
+  Serial.print("fm3=");
+  Serial.println(freeMemory());
+  if (game != nullptr)
+  {
+    delete game;
+    game = nullptr;
   }
 
-  Serial.print("mem4=");
+  Serial.print("fm4=");
   Serial.println(freeMemory());
+
+  screen = SCR_M_MAIN;
+  mainMenu = new Menu(true);
+  mainMenu->setOffTimerOn(3000);
+  mainMenu->setMenuLvl(1);
+  mainMenu->setMenuCode(MENU_GAMES);
+  mainMenu->setLevelsCheckedOption(0, MMENU_GAMES);
+  mainMenu->menuFromPRGMEM();
 }

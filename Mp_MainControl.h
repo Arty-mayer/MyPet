@@ -5,9 +5,8 @@
 #include "Mp_Gfx.h"
 #include <MemoryFree.h>
 #include "Mp_define.h"
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include "Gm_tank_Game.h"
+
+#include "src/GameTank/Gm_tank_Game.h"
 
 extern Button btn_lt;
 extern Button btn_rt;
@@ -15,7 +14,7 @@ extern Button btn_dn;
 extern Button btn_up;
 extern Button btn_st;
 
-using Tank::Game;
+using Tank::GameTank;
 
 class MainControl
 {
@@ -45,6 +44,7 @@ private:
   void funcDoctor();
   void funcHealing();
   void funcGameStarter();
+  void gameExit();
 
   void funcSelector();
 
@@ -58,8 +58,9 @@ private:
   Gfx *gfx = nullptr;
   bool isDisplayOn;
   Timer stateTimer;
+  Timer SleepTimer;
 
-  Tank::Game* gameTank = nullptr;
+  Game* game = nullptr;
 
   unsigned int screen; // экран для отображения
                        // меню, которое должно быть на экране

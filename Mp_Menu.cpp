@@ -1,19 +1,20 @@
 #include "Mp_Menu.h"
 
-Menu::Menu() : checkedOption(1), optionsCount(0), menuIsActive(false), OffTimerIsOn(false), cycled(true) {}
-Menu::Menu(bool cycl) : checkedOption(1), optionsCount(0), menuIsActive(false), OffTimerIsOn(false), cycled(cycl) {}
+Menu::Menu(bool cycl) : checkedOption(1), optionsCount(0), menuIsActive(false), OffTimerIsOn(false), cycled(cycl) {
+    menuOffTimer = nullptr;
+}
 
 Menu::~Menu()
 {
-    if(menuJS != nullptr){
+    if (menuJS != nullptr)
+    {
         deleteMenuJs();
-   
     }
-    if(menuOffTimer != nullptr){
+    if (menuOffTimer != nullptr)
+    {
         delete menuOffTimer;
         menuOffTimer = nullptr;
     }
-
 }
 
 unsigned int Menu::getMenuCode()
@@ -180,17 +181,11 @@ byte Menu::getNeighbour(byte num, bool left)
     return a;
 }
 
-
-
 void Menu::setOffTime(unsigned long time)
 {
     menuOffTimer->setTime(time);
 }
 
-void Menu::setOffTimerOn()
-{
-    setOffTimerOn(10000);
-}
 
 void Menu::setOffTimerOn(unsigned int time)
 {
@@ -223,13 +218,12 @@ void Menu::deleteOptions()
 
 bool Menu::menuOpen()
 {
-    if (menuTimer.isTimerEnd() && getMenuToOpen(checkedOption)!=0)
+    if (menuTimer.isTimerEnd() && getMenuToOpen(checkedOption) != 0)
     {
-        if (getMenuToOpen(checkedOption) == 0)
-        {
-            return false;
-        }
         menuTimer.timerStart();
+        if (OffTimerIsOn){
+            menuOffTimer->timerStart();
+        }
         activeMenusCode = getMenuToOpen(checkedOption);
         menuOption[menuLevel] = checkedOption;
         menuLevel++;
@@ -251,6 +245,9 @@ bool Menu::menuClose()
             return false;
         }
         menuTimer.timerStart();
+        if (OffTimerIsOn){
+            menuOffTimer->timerStart();
+        }
         activeMenusCode = getHighLvlMenuNum(activeMenusCode);
         if (activeMenusCode != menuCode)
         {
@@ -261,6 +258,11 @@ bool Menu::menuClose()
         return true;
     }
     return false;
+}
+
+void Menu::setMenuLvl(byte lvl)
+{
+    menuLevel = lvl;
 }
 
 bool Menu::isA1stDraw()
@@ -311,6 +313,14 @@ bool Menu::setCheckedOption(byte option)
 bool Menu::getIsMenuTimerEnd()
 {
     return menuTimer.isTimerEnd();
+}
+
+void Menu::setLevelsCheckedOption(byte lvl, byte option)
+{
+    if (lvl > MENU_MAX_LVL || option > 254) {
+        return;
+    }
+    menuOption[lvl] = option;
 }
 
 bool Menu::setActiveMenuCode(unsigned int code)
@@ -372,22 +382,21 @@ void Menu::menuFromPRGMEM()
     case MENU_MAIN:
         MenuCopying(mMenu, sizeof(mMenu) / sizeof(mMenu[0]));
         break;
-           case MENU_FOOD:
-          MenuCopying(foodMenu,sizeof(foodMenu) / sizeof(foodMenu[0]));
-          break;
-            case MENU_BATH:
-          MenuCopying(bathMenu, sizeof(bathMenu) / sizeof(bathMenu[0]));
-          break;
-            case MENU_HOSPITAL:
-          MenuCopying(hospital, sizeof(hospital) / sizeof(hospital[0]));
-          break;
-            case MENU_BOOK:
-         MenuCopying(book,sizeof(book) / sizeof(book[0]));
-          break;
-            case MENU_GAMES:
-          MenuCopying(games,sizeof(games) / sizeof(games[0]));
-          break;
-        
+    case MENU_FOOD:
+        MenuCopying(foodMenu, sizeof(foodMenu) / sizeof(foodMenu[0]));
+        break;
+    case MENU_BATH:
+        MenuCopying(bathMenu, sizeof(bathMenu) / sizeof(bathMenu[0]));
+        break;
+    case MENU_HOSPITAL:
+        MenuCopying(hospital, sizeof(hospital) / sizeof(hospital[0]));
+        break;
+    case MENU_BOOK:
+        MenuCopying(book, sizeof(book) / sizeof(book[0]));
+        break;
+    case MENU_GAMES:
+        MenuCopying(games, sizeof(games) / sizeof(games[0]));
+        break;
 
     default:
         break;
@@ -418,7 +427,6 @@ void Menu::MenuCopying(const unsigned int (*menu)[4], byte numRows)
         menuJS[i + 1][3] = pgm_read_word(&menu[i][3]);
     }
 
-   
     optionsCount = numRows;
 }
 

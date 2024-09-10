@@ -23,12 +23,14 @@ namespace Tank
         void drawCannon(int PosX, int PosY);
         void drawTank(int posX, int posY, byte movment, byte chainAnimation, byte sizeX, byte imgset);
         void drawExplosion(int x, int y, byte imgNum);
-
+        void drawMenu (byte selected, byte lives, byte enemys);
+        void drawPauseMenu(byte selected);
+        void drawBorder();
     private:
         const uint8_t *getImg(byte bildSet, byte move, byte animateionNum);
         const uint8_t *getExplsImg(byte bildNum);
-        // Adafruit_SSD1306 &display;
-        // Timer framePause = Timer(66);
+        const uint8_t *getMenusImg(byte bildNum);
+
     };
 }
 #endif

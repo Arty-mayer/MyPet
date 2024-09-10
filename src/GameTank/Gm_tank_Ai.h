@@ -1,7 +1,7 @@
 #ifndef AI_H
 #define AI_H
 
-#include "Lib_Timer.h"
+#include "../../Lib_Timer.h"
 #include "Gm_tank_Tank.h"
 
 namespace Tank

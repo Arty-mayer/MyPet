@@ -3,12 +3,13 @@
 #include "Mp_Gfx.h"
 #include <MemoryFree.h>
 #include "Lib_Timer.h"
-// #include "GameTank/GameTank.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
 
-// Adafruit_SSD1306 display(128,64,&Wire,OLED_RESET);
+ //Adafruit_SSD1306 display(128,64,&Wire,OLED_RESET);
 
 #define OLED_MOSI 9
 #define OLED_CLK 10
@@ -23,9 +24,9 @@ Button btn_st = Button(3, true);
 Button btn_md = Button(4, true);
 Button btn_esc = Button(2, true);
 
-Adafruit_SSD1306 display(128, 128, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+Adafruit_SSD1306 display(128, 64, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
-// Gfx gfx(display);
+
 MainControl maincontrol;
 
  //Game* game;

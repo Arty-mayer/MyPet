@@ -3,7 +3,7 @@
 
 
 #include <Arduino.h>
-#include "Lib_Timer.h"
+#include "../../Lib_Timer.h"
 
 
 
@@ -39,15 +39,11 @@ public:
   bool shoot();
   int getCannonStartX();
   int getCannonStartY();
-/*
-  int borderR;
-  int* borderL;
-  int* borderU;
-  int* borderD;
-*/
+
+
   // vars
   byte cannon1Count = 0;
-  Timer shootTimer = Timer(500);
+  Timer shootTimer = Timer(200);
   bool borderLock = false;
 
 private:

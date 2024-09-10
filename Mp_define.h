@@ -6,7 +6,7 @@
 #define SCR_FOOD 4
 #define SCR_STAT 5
 #define SCR_CLOCK 6
-#define SCR_GAME_TANK 7
+#define SCR_GAME 7
 
 //menus
 #define MENU_MAIN 0
