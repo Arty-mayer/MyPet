@@ -57,6 +57,8 @@
 // games menu
 
 #define GAMES_TANK 23
+#define GAMES_TETRIS 24
+#define GAMES_SEEBATTLE 25
 
 //functions
 #define FUNC_STATUS 1

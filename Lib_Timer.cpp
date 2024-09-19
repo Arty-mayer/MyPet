@@ -14,7 +14,7 @@ void Timer::setTime (unsigned long time){
 void Timer::timerStart(){
   timerEnd = false;
   timerOn = true;
-  t0 = millis();
+  t0 = millis()+ttime;
 }
 
 void Timer::timerStop(){
@@ -23,7 +23,7 @@ void Timer::timerStop(){
 
 void Timer::tick (){
   if (timerOn){
-    if ((millis() - t0) >= ttime){
+    if (millis()  >= t0){
       timerEnd = true;
       timerOn = false;
     }

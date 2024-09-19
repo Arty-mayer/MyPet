@@ -6,7 +6,9 @@
 #include <MemoryFree.h>
 #include "Mp_define.h"
 
-#include "src/GameTank/Gm_tank_Game.h"
+#include "src/GameTank/Game.h"
+#include "src/GameTetris/Game.h"
+#include "src/GameSeaBat/Game.h"
 
 extern Button btn_lt;
 extern Button btn_rt;
@@ -14,7 +16,7 @@ extern Button btn_dn;
 extern Button btn_up;
 extern Button btn_st;
 
-using Tank::GameTank;
+//using Tank::GameTank;
 
 class MainControl
 {

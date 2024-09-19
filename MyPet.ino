@@ -11,11 +11,11 @@
 
  //Adafruit_SSD1306 display(128,64,&Wire,OLED_RESET);
 
-#define OLED_MOSI 9
-#define OLED_CLK 10
-#define OLED_DC 11
-#define OLED_CS 12
-#define OLED_RESET 13
+#define OLED_MOSI 50
+#define OLED_CLK 52
+#define OLED_DC 10
+#define OLED_CS 53
+#define OLED_RESET 51
 Button btn_lt = Button(8, true);
 Button btn_rt = Button(7, true);
 Button btn_dn = Button(6, true);

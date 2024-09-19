@@ -1,4 +1,4 @@
-#include "Gm_tank_Ai.h"
+#include "tank_Ai.h"
 
 namespace Tank
 {
@@ -6,7 +6,7 @@ int Ai::enemysX = 0;
 int Ai::enemysY = 0;
 int Ai::enemysSize = 0;
 
-Ai::Ai(Tank &tnk) : tank(tnk)
+Ai::Ai(Tank *tnk) : tank(tnk)
 {
 }
 
@@ -34,9 +34,9 @@ void Ai::setEmenyPos(int x, int y, int size)
 
 void Ai::steper()
 {
-    if (tank.borderLock)
+    if (tank->borderLock)
     {
-        switch (tank.getMovement())
+        switch (tank->getMovement())
         {
         case UP:
             move = DOWN;
@@ -51,7 +51,7 @@ void Ai::steper()
             move = LEFT;
             break;
         }
-        tank.borderLock = false;
+        tank->borderLock = false;
     }
     timerStep.tick();
 

@@ -1,4 +1,4 @@
-#include "Gm_tank_Gfx.h"
+#include "Gfx.h"
 
 extern Adafruit_SSD1306 display;
 
@@ -8,7 +8,6 @@ namespace Tank
 
     void Gfx::drawScr()
     {
-
         display.display();
         display.clearDisplay();
     }
@@ -28,7 +27,7 @@ namespace Tank
         display.drawBitmap(x, y, getExplsImg(imgNum), 11, 11, 1);
     }
 
-    void Gfx::drawMenu(byte selected, byte lives, byte enemys)
+    void Gfx::drawMenu(byte selected, byte lives, byte enemys, unsigned long score, unsigned long hiScore)
     {
         for (byte i = 0; i < 4; i++)
         {
@@ -36,23 +35,69 @@ namespace Tank
         }
         byte xCor = (selected - 1) * 24 + 9 + 16;
         display.fillTriangle(xCor - 6, 01, xCor + 6, 01, xCor, 07, WHITE);
-        display.setCursor(45, 30);
+        display.setTextSize(1);
+        display.setCursor(47, 30);
         display.print(lives);
-        display.setCursor(68, 30);
+        display.setCursor(70, 30);
         display.print(enemys);
+        display.setCursor(0, 45);
+        //display.setTextSize(1);
+        display.print("Score: ");
+        display.print(score);
+        display.setCursor(0, 55);
+        display.print("Hi score: ");
+        display.print(hiScore);
     }
-    void Gfx::drawPauseMenu(byte selected)
+    void Gfx::drawPauseMenu(byte selected, unsigned long score, unsigned long hiScore)
     {
 
         display.drawBitmap(40, 10, getMenusImg(10), 18, 18, 1);
         display.drawBitmap(64, 10, getMenusImg(3), 18, 18, 1);
         byte xCor = (selected - 1) * 24 + 9 + 40;
         display.fillTriangle(xCor - 6, 01, xCor + 6, 01, xCor, 07, WHITE);
+        display.setCursor(0, 45);
+        display.setTextSize(1);
+        display.print("Score: ");
+        display.print(score);
+        display.setCursor(0, 55);
+        display.print("Hi score: ");
+        display.print(hiScore);
     }
 
     void Gfx::drawBorder()
     {
         display.drawRect(0, 0, 128, 64, 1);
+    }
+
+    void Gfx::drawGameOver()
+    {
+        display.setTextSize(3);
+        display.setCursor(30, 10);
+        display.print("Game");
+         display.setCursor(30, 30);
+        display.print("Over");
+        // display.display();
+        // display.clearDisplay();
+    }
+
+    void Gfx::drawScore(unsigned long score, unsigned long hiScore)
+    {
+        display.setTextSize(1);
+        display.setCursor(20, 10);
+        display.print("Score: ");
+        display.setCursor(20, 20);
+        display.print(score);
+        display.setCursor(20, 40);
+        display.print("Hi score: ");
+        display.setCursor(20, 50);
+        display.print(hiScore);
+        // display.display();
+        // display.clearDisplay();
+    }
+
+    void Gfx::drawPortal(int x, int y, uint8_t step)
+    {
+        display.drawBitmap(x,y,getPortalImg(step),18,18,1);
     }
 
     const uint8_t *Gfx::getImg(byte bildSet, byte move, byte animateionNum)
@@ -199,6 +244,49 @@ namespace Tank
             break;
         case 10:
             return menuBack;
+            break;
+        }
+        return nullptr;
+    }
+    const uint8_t *Gfx::getPortalImg(uint8_t step)
+    {
+        switch (step)
+        {
+        case 1:
+            return portal1;
+            break;
+            case 2:
+            return portal2;
+            break;
+            case 3:
+            return portal3;
+            break;
+            case 4:
+            return portal4;
+            break;
+            case 5:
+            return portal5;
+            break;
+            case 6:
+            return portal6;
+            break;
+            case 7:
+            return portal7;
+            break;
+            case 8:
+            return portal8;
+            break;
+            case 9:
+            return portal9;
+            break;
+            case 10:
+            return portal10;
+            break;
+            case 11:
+            return portal11;
+            break;
+            case 12:
+            return portal12;
             break;
         }
         return nullptr;

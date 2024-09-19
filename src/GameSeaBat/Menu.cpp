@@ -1,6 +1,6 @@
-#include "GM_Menu.h"
+#include "Menu.h"
 
-namespace Tank
+namespace SeaBattle
 {
 
     Menu::Menu() : checkedOption(1), optionsCount(0) {

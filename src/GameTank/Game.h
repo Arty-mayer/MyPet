@@ -1,24 +1,24 @@
-
 #include <Arduino.h>
 #include "../../MP_Game.h"
 #include "../../Lib_Button.h"
-#include "Gm_Menu.h"
-#include "Gm_tank_Tank.h"
-#include "Gm_tank_Ai.h"
-#include "Gm_tank_Gfx.h"
-#include "Gm_tank_cannonShell.h"
-#include "Gm_tank_explosion.h"
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <MemoryFree.h>
+#include "Menu.h"
+#include "Tank.h"
+#include "tank_Ai.h"
+#include "Gfx.h"
+#include "cannonShell.h"
+#include "explosion.h"
+#include "Portal.h"
+//#include <Adafruit_GFX.h>
+//#include <Adafruit_SSD1306.h>
 
-// using Tank::Tank;
-// using Tank::Adafruit_SSD1306;
 
 #define MAX_TANK_COUNT 10
 #define CANNON2_MAX 20
 #define CANNON1_MAX 5
 #define MAX_EXPLOSIONS 10
+#define MAX_DEAD_ENEMYES 5
+
+#define ENEMYS_ARMOR 1
 
 extern Button btn_lt;
 extern Button btn_rt;
@@ -39,6 +39,9 @@ namespace Tank
         ~GameTank();
 
         void mainLoop();
+        bool getExit();
+
+        Portal *portal = nullptr;
         Tank *tank[MAX_TANK_COUNT];
         Ai *ai[MAX_TANK_COUNT];
 
@@ -47,9 +50,8 @@ namespace Tank
         cannonShell *shell1[CANNON1_MAX];
         Explosion *expl[MAX_EXPLOSIONS];
         byte explosionsCount = 0;
-        byte enemysCount = 1;
+        byte enemysCountOnScreen = 1;
         byte lives = 1;
-        bool getExit();
 
     private:
         bool exit = false;
@@ -65,14 +67,24 @@ namespace Tank
         void enemysControl();
         void drawScreen();
         void tankControl();
+        void enemyCreate(int x, int y);
+        void portalCreate();
+        void portalControl();
         void explosionsControl();
         void cannonControl();
         byte findFreeShell();
         byte findFreeEnemysShell();
         byte findFreeExpl();
         void gameStep();
-     //   void btnsListener();
+        void killUndDelete(uint8_t tankNum);
+        bool checkCorner(uint8_t corner);
+       // void killTank(uint8_t tankNum);
+       // void deleteTankInstance(uint8_t tankNum);
+       // void deadsTanksControl(uint8_t tankNum);
+       // void deadsTanksControlAfterDestroy(uint8_t tankNum);
 
+
+        /// @brief Game menu creation
         void menuCreate();
         void menuOptionActivation();
         bool menuOptionChange(bool revers);
@@ -83,18 +95,23 @@ namespace Tank
         void gameResume();
         void gameEnd();
         void gameExit();
+        void gameOver();
+       
 
-
-        //variables
+        // variables
         bool menudraw;
         bool gameStarted;
         byte gameScreen;
-        
+        unsigned long score = 0;
+        unsigned long hiScore = 0;
+        uint8_t corner = 0;
 
+        uint8_t enemysCount = 0;
+        uint8_t deadTanks[MAX_DEAD_ENEMYES];
 
         Timer frameTimer = Timer(35);
-        Menu* menu;
-      
+        Menu *menu;
+
         Gfx gfx = Gfx();
     };
 }

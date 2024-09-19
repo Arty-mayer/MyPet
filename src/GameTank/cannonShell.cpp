@@ -1,4 +1,4 @@
-#include "Gm_tank_cannonShell.h"
+#include "cannonShell.h"
 
 namespace Tank {
 cannonShell::cannonShell(byte x, byte y, byte direction) : direction(direction), speed(2), posX(x), posY(y)

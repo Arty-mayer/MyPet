@@ -1,4 +1,4 @@
-#include "Gm_tank_explosion.h"
+#include "explosion.h"
 
 Explosion::Explosion(int x, int y){
    Explosion(x,y,false); 

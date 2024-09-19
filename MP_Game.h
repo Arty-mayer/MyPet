@@ -1,11 +1,11 @@
 
+#ifndef MP_GAME_H
+#define MP_GAME_H
 #include <Arduino.h>
 #include "Lib_Button.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h> 
 #include <MemoryFree.h>
-
-
 
 
 
@@ -29,3 +29,5 @@ public:
 
 
 };
+
+#endif

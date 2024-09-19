@@ -51,8 +51,10 @@ const  unsigned int PROGMEM book[3][4] = {
     {BOOK_ABC, 0, FUNC_HEALING}
 };
 
-const  unsigned int PROGMEM games[1][4] = {
+const  unsigned int PROGMEM games[3][4] = {
     {GAMES_TANK, 0, FUNC_GAME},
+    {GAMES_TETRIS, 0, FUNC_GAME},
+    {GAMES_SEEBATTLE, 0, FUNC_GAME},
     
 };
 

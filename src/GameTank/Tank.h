@@ -5,8 +5,6 @@
 #include <Arduino.h>
 #include "../../Lib_Timer.h"
 
-
-
 #define LEFT 1
 #define RIGHT 2
 #define UP 3
@@ -21,10 +19,7 @@ public:
  
   Tank(int x, int y, byte move, byte imgset, byte maxCannonShells);
 
-
   bool moveH(bool revers, bool moveBlocked);
-  
- 
   bool moveV(bool revers, bool moveBlocked);
 
   bool setposLock(bool lock);
@@ -40,11 +35,19 @@ public:
   int getCannonStartX();
   int getCannonStartY();
 
+  bool isDestroyed();
+
 
   // vars
   byte cannon1Count = 0;
   Timer shootTimer = Timer(200);
   bool borderLock = false;
+
+
+  void hit();
+  void hit(uint8_t damage);
+  uint8_t getArmor();
+  void setArmor(uint8_t arm);
 
 private:
   // methodes
@@ -53,6 +56,8 @@ private:
 
   byte speed ;
   byte size = 18;
+  uint8_t armor  = 1; 
+  bool destroyed = false;
 
   int posX;
   int posY;
@@ -62,7 +67,6 @@ private:
 
   byte chainBild ;
   bool posLocked;
-  
 
   byte movement;
 

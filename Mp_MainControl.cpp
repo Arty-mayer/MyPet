@@ -340,6 +340,18 @@ void MainControl::funcGameStarter()
       game = new Tank::GameTank();
     }
     break;
+    case 2:
+    if (game == nullptr)
+    {
+      game = new Tetris::GameTetris();
+    }
+    break;
+    case 3:
+    if (game == nullptr)
+    {
+      game = new SeaBattle::GameSeaBattle;
+    }
+    break;
 
   default:
     break;

@@ -2,7 +2,7 @@
 
 #include "Mp_Gfx.h"
 
-Gfx::Gfx()  {}
+Gfx::Gfx() {}
 // Gfx::Gfx(){}
 
 void Gfx::drawMeinMenu(unsigned int main, unsigned int i1, unsigned int i2, unsigned int i3)
@@ -190,6 +190,12 @@ const uint8_t *Gfx::getMenuImg(unsigned int imgNummer)
     break;
   case GAMES_TANK:
     return tank32;
+    break;
+  case GAMES_TETRIS:
+    return tetris32;
+    break;
+  case GAMES_SEEBATTLE:
+    return seabattle32;
     break;
   default:
     return noimg32;

@@ -1,5 +1,5 @@
 
-#include "Gm_tank_Game.h"
+#include "Game.h"
 
 namespace Tank
 {
@@ -58,13 +58,12 @@ namespace Tank
             menuCreate();
             if (gameStarted)
             {
-
-                gfx.drawPauseMenu(menu->getCheckedOption());
+                gfx.drawPauseMenu(menu->getCheckedOption(), score, hiScore);
                 gfx.drawScr();
             }
             else
             {
-                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCount);
+                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCountOnScreen, score, hiScore);
                 gfx.drawScr();
             }
         }
@@ -86,13 +85,12 @@ namespace Tank
         {
             if (gameStarted)
             {
-
-                gfx.drawPauseMenu(menu->getCheckedOption());
+                gfx.drawPauseMenu(menu->getCheckedOption(), score, hiScore);
                 gfx.drawScr();
             }
             else
             {
-                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCount);
+                gfx.drawMenu(menu->getCheckedOption(), lives, enemysCountOnScreen, score, hiScore);
                 gfx.drawScr();
             }
         }
@@ -126,14 +124,14 @@ namespace Tank
             if (menu->getTimerIsEnd())
             {
                 menu->timerRestart();
-                enemysCount = (revers) ? enemysCount - 1 : enemysCount + 1;
-                if (enemysCount < 1)
+                enemysCountOnScreen = (revers) ? enemysCountOnScreen - 1 : enemysCountOnScreen + 1;
+                if (enemysCountOnScreen < 1)
                 {
-                    enemysCount = 1;
+                    enemysCountOnScreen = 1;
                 }
-                if (enemysCount > 5)
+                if (enemysCountOnScreen > 5)
                 {
-                    enemysCount = 5;
+                    enemysCountOnScreen = 5;
                 }
                 return true;
             }
@@ -193,16 +191,33 @@ namespace Tank
             delete menu;
             menu = nullptr;
         }
-        tank[0] = new Tank(0, 20, RIGHT, 1, 2);
+
+        tank[0] = new Tank(0, 20, RIGHT, 1, 3);
+        tank[0]->setArmor(lives);
+        enemysCount = enemysCountOnScreen;
+
         for (byte i = 1; i <= enemysCount; i++)
         {
-            tank[i] = new Tank(50, (i - 1) * 20, LEFT, 2, 2);
-            ai[i] = new Ai(*tank[i]);
+            uint8_t x = (i < 4) ? 50 : 90;
+            uint8_t y = (i < 4) ? (i - 1) * 20 : (i - 3) * 20;
+            tank[i] = new Tank(x, y, LEFT, 2, 2);
+            ai[i] = new Ai(tank[i]);
+            tank[i]->setArmor(ENEMYS_ARMOR);
         }
-        delay(500);
+
         gameScreen = 1;
         gameStarted = true;
+        score = 0;
+        delay(500);
         frameTimer.timerStart();
+
+        /*
+        deadTanks[0] = 0;
+        deadTanks[1] = 0;
+        deadTanks[2] = 0;
+        deadTanks[3] = 0;
+        deadTanks[4] = 0;
+        */
     }
 
     void GameTank::gamePause()
@@ -276,7 +291,16 @@ namespace Tank
             }
         }
 
-        delay(300);
+        for (uint8_t i = 1; i < MAX_DEAD_ENEMYES; i++)
+        {
+            deadTanks[i] = 0;
+        }
+        if (portal != nullptr)
+        {
+            delete portal;
+            portal = nullptr;
+        }
+        delay(200);
     }
 
     void GameTank::gameExit()
@@ -285,10 +309,35 @@ namespace Tank
         gameEnd();
     }
 
+    void GameTank::gameOver()
+    {
+        frameTimer.timerStop();
+        gameStarted = false;
+        if (hiScore < score)
+            hiScore = score;
+
+        gfx.drawGameOver();
+        gfx.drawScr();
+        delay(1500);
+        gfx.drawScore(score, hiScore);
+        gfx.drawScr();
+        gameEnd();
+        gameScreen = 2;
+    }
+
     void GameTank::mainLoop()
     {
         if (exit)
         {
+            return;
+        }
+        if (gameScreen == 2)
+        {
+            if (btn_st.btnState())
+            {
+                gameScreen = 0;
+                delay(200);
+            }
             return;
         }
         if (gameScreen == 0)
@@ -307,6 +356,11 @@ namespace Tank
 
     void GameTank::drawScreen()
     {
+        if (portal != nullptr)
+        {
+            gfx.drawPortal(portal->x, portal->y, portal->getStep());
+        }
+
         for (byte i = 0; i < 10; i++)
         {
             if (tank[i] == nullptr)
@@ -393,6 +447,84 @@ namespace Tank
         tank[0]->setposLock(false);
 
         enemysControl();
+    }
+
+    void GameTank::enemyCreate(int x, int y)
+    {
+        uint8_t a = 0;
+        for (uint8_t i = 1; i < MAX_TANK_COUNT; i++)
+        {
+            if (tank[i] == nullptr)
+            {
+                a = i;
+                break;
+            }
+        }
+        uint8_t richtung = 1;
+        switch (corner)
+        {
+        case 0:
+        case 2:
+            richtung = RIGHT;
+            break;
+
+        default:
+            richtung = LEFT;
+            break;
+        }
+        if (a > 0)
+        {
+            tank[a] = new Tank(x, y, richtung, 2, 2);
+            tank[a]->setArmor(ENEMYS_ARMOR);
+            ai[a] = new Ai(tank[a]);
+            enemysCount++;
+        }
+    }
+
+    void GameTank::portalCreate()
+    {
+        if (portal == nullptr)
+        {
+            uint8_t x = 0;
+            uint8_t y = 0;
+            corner = (corner == 3) ? 0 : corner + 1;
+            if (!checkCorner(corner))
+                corner = (corner == 3) ? 0 : corner + 1;
+            switch (corner)
+            {
+            case 0:
+                x = 0;
+                y = 0;
+                break;
+            case 1:
+                x = 109;
+                y = 0;
+                break;
+            case 2:
+                x = 0;
+                y = 45;
+                break;
+            case 3:
+                x = 109;
+                y = 45;
+                break;
+            }
+            portal = new Portal(x, y);
+        }
+    }
+
+    void GameTank::portalControl()
+    {
+        if (portal != nullptr)
+        {
+            portal->steper();
+            if (portal->isEnded())
+            {
+                enemyCreate(portal->x, portal->y);
+                delete portal;
+                portal = nullptr;
+            }
+        }
     }
 
     void GameTank::enemysControl()
@@ -617,7 +749,6 @@ namespace Tank
 
     void GameTank::cannonControl()
     {
-
         for (byte i = 0; i < CANNON1_MAX; i++)
         {
             if (shell1[i] != nullptr)
@@ -629,6 +760,23 @@ namespace Tank
                 if (a != 0)
                 {
                     shell1[i]->explosed = true;
+                    bool tankDestr = tank[a]->isDestroyed();
+                    tank[a]->hit();
+                    if (tank[a]->getArmor() == 0)
+                    {
+                        killUndDelete(a);
+                        /*
+                         if (tankDestr)
+                          {
+                              deleteTankInstance(a);
+                          }
+                          else
+                          {
+                              killTank(a);
+                              deadsTanksControl(a);
+                          }
+                           */
+                    }
                 }
             }
         }
@@ -641,6 +789,11 @@ namespace Tank
                 if (hittingPlayer(i))
                 {
                     shell2[i]->explosed = true;
+                    tank[0]->hit();
+                    if (tank[0]->getArmor() == 0)
+                    {
+                        gameOver();
+                    }
                 }
             }
         }
@@ -712,8 +865,10 @@ namespace Tank
 
     void GameTank::gameStep()
     {
+
         tank[0]->shootTimer.tick();
         drawScreen();
+        portalControl();
         tankControl();
         explosionsControl();
         cannonControl();
@@ -729,5 +884,127 @@ namespace Tank
 
             gamePause();
         }
+        if (enemysCount < enemysCountOnScreen)
+        {
+           
+            portalCreate();
+        }
     }
+
+    void GameTank::killUndDelete(uint8_t tankNum)
+    {
+        if (ai[tankNum] != nullptr)
+        {
+            delete ai[tankNum];
+            ai[tankNum] = nullptr;
+        }
+        if (tank[tankNum] != nullptr)
+        {
+            delete tank[tankNum];
+            tank[tankNum] = nullptr;
+        }
+        enemysCount--;
+        score = score + 1 * enemysCountOnScreen;
+    }
+
+    bool GameTank::checkCorner(uint8_t corner)
+    {
+        switch (corner)
+        {
+        case 0:
+            if (tank[0]->getTankXPosition() > 28 /*tank size + 10 px*/)
+            {
+                return true;
+            }
+            else if (tank[0]->getTankYPosition() > 28 /*tank size + 10 px*/)
+            {
+                return true;
+            }
+            break;
+        case 1:
+            if (tank[0]->getTankXPosition() < 81 /*127 - tank size- tank size- 10 px*/)
+            {
+                return true;
+            }
+            else if (tank[0]->getTankYPosition() > 28 /*tank size + 10 px*/)
+            {
+                return true;
+            }
+            break;
+        case 2:
+            if (tank[0]->getTankXPosition() > 28 /*tank size*/)
+            {
+                return true;
+            }
+            else if (tank[0]->getTankYPosition() < 17 /*63 - tank size- tank size- 10 px*/)
+            {
+                return true;
+            }
+            break;
+        case 3:
+            if (tank[0]->getTankXPosition() < 81 /*127 - tank size- tank size- 10 px*/)
+            {
+                return true;
+            }
+            else if (tank[0]->getTankYPosition() < 17 /*63 - tank size- tank size- 10 px*/)
+            {
+                return true;
+            }
+            break;
+        }
+        return false;
+    }
+
+    /*
+        void GameTank::killTank(uint8_t tankNum)
+        {
+            if (ai[tankNum] != nullptr)
+            {
+                delete ai[tankNum];
+                ai[tankNum] = nullptr;
+            }
+            enemysCount--;
+            tank[tankNum]->setArmor(5);
+            score = score + 1 * enemysCountOnScreen;
+        }
+
+        void GameTank::deleteTankInstance(uint8_t tankNum)
+        {
+            delete tank[tankNum];
+            tank[tankNum] = nullptr;
+            deadsTanksControlAfterDestroy(tankNum);
+        }
+
+        void GameTank::deadsTanksControl(uint8_t tankNum)
+        {
+            if (deadTanks[4] != 0 && deadTanks[0] != 0)
+            {
+                delete tank[deadTanks[0]];
+                tank[deadTanks[0]] = nullptr;
+            }
+            for (uint8_t i = 1; i < MAX_DEAD_ENEMYES; i++)
+            {
+                deadTanks[i - 1] = deadTanks[i];
+            }
+            deadTanks[MAX_DEAD_ENEMYES - 1] = tankNum;
+        }
+
+        void GameTank::deadsTanksControlAfterDestroy(uint8_t tankNum)
+        {
+            uint8_t i;
+            for (i = 0; i < MAX_DEAD_ENEMYES; i++)
+            {
+                if (deadTanks[i] == tankNum)
+                {
+                    break;
+                }
+            }
+            i++;
+            for (i; i < MAX_DEAD_ENEMYES; i++)
+            {
+                deadTanks[i - 1] = deadTanks[i];
+            }
+            deadTanks[MAX_DEAD_ENEMYES - 1] = 0;
+        }
+        */
 }

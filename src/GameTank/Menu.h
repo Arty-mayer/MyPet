@@ -13,10 +13,10 @@ namespace Tank
 
         bool optionChanging(bool revers); // переключение опции
 
-        bool isActive();       // возвращает menuOn - статус меню (активно/спит)
+
         bool addOption(byte count);      // добавить пункт меню (в конец массива)
         bool getChangStatus(); // возращает true если была смена опции и переводит этот ключь в false
-        bool activation();
+
         bool setCheckedOption(byte option);
         bool getTimerIsEnd();
         void timerRestart();
