@@ -31,6 +31,7 @@ namespace SeaBattle
         byte xCor = (selected - 1) * 24 + 9 + 16;
         display.fillTriangle(xCor - 6, 01, xCor + 6, 01, xCor, 07, WHITE);
         display.setCursor(45, 30);
+        display.setTextSize (1);
         display.print(speed);
     }
     void Gfx::drawPauseMenu(byte selected)
@@ -241,6 +242,7 @@ namespace SeaBattle
         {
             display.setCursor(108, 4);
         }
+        display.setTextSize (1);
         display.print(tx);
         // display.print('-');
         display.print(y);
@@ -248,6 +250,7 @@ namespace SeaBattle
 
     void Gfx::printStatistic(uint8_t *arr1, uint8_t *arr2)
     {
+        display.setTextSize (1);
         display.setCursor (62,13);
         display.print('1');
         for (uint8_t i = 0; i < 4; i++)

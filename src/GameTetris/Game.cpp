@@ -101,9 +101,9 @@ namespace Tetris
                 {
                     speed = 1;
                 }
-                if (speed > 15)
+                if (speed > 10)
                 {
-                    speed = 15;
+                    speed = 10;
                 }
                 return true;
             }
@@ -177,6 +177,8 @@ namespace Tetris
         nextFigure = random(1, figureCount + 1);
         gameStarted = true;
         timerFrame.timerStart();
+        stepTime = 1000 - 90 * (speed - 1);
+        timerGameStep.setTime(stepTime);
         timerGameStep.timerStart();
         gameScreen = 1;
         delay(200);
@@ -208,6 +210,17 @@ namespace Tetris
             delete menu;
             menu = nullptr;
         }
+        if (figure != nullptr)
+        {
+            delete figure;
+            figure = nullptr;
+        }
+        if (field != nullptr)
+        {
+            delete field;
+            field = nullptr;
+        }
+
         timerFrame.timerStop();
         timerGameStep.timerStop();
         gameStarted = false;
@@ -226,7 +239,8 @@ namespace Tetris
     {
         gameStarted = false;
         timerGameStep.timerStop();
-        // timerFrame.timerStop();
+        // вывести game over + score
+        //  timerFrame.timerStop();
     }
 
     void GameTetris::mainLoop()
@@ -314,19 +328,22 @@ namespace Tetris
         if (btn_dn.btnState() && !downpressed)
         {
             timerGameStep.setTime(40);
+            timerGameStep.timerStart();
             downpressed = true;
         }
         if (downpressed && !btn_dn.btnState())
         {
             timerGameStep.setTime(stepTime);
             downpressed = false;
+       
         }
         if (btn_st.btnState())
         {
             if (timerFigureDown.isTimerEnd())
             {
-                figure->setPosYInField(field->figureDown(arr, figure->getPosXInField(), figure->getPosYInField()));
                 timerFigureDown.timerStart();
+                figure->setPosYInField(field->figureDown(arr, figure->getPosXInField(), figure->getPosYInField()));
+                gameStep();                
             }
         }
     }
@@ -418,7 +435,7 @@ namespace Tetris
     {
         if (field->getLvl() >= 19)
         {
-            Serial.println("game over");
+
             gameOver();
         }
         checkLinies();
@@ -438,6 +455,7 @@ namespace Tetris
                 return;
             }
             figure->step();
+                
         }
     }
 

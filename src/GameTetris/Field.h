@@ -1,5 +1,5 @@
-#ifndef SEA_BATTLE_FIELD_H
-#define SEA_BATTLE_FIELD_H
+#ifndef TETRIS_FIELD_H
+#define TETRIS_FIELD_H
 
 #include <Arduino.h>
 namespace Tetris

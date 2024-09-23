@@ -21,17 +21,17 @@ namespace Tetris
         Gfx();
 
         void drawScr();
-        void drawMenu (byte selected, byte speed);
+        void drawMenu(byte selected, byte speed);
         void drawPauseMenu(byte selected);
         void drawBorder();
-        void drawFigure(uint8_t* arr, int x, int y);
-        void drawField(GameField* field);
+        void drawFigure(uint8_t *arr, int x, int y);
+        void drawField(GameField *field);
         void drawScore(unsigned long score);
         void drawNextFig(byte figNum);
+        void printDigital(unsigned long dig, int x, int y) const;
 
     private:
-        const uint8_t *getImg(byte bildSet, byte move, byte animateionNum);
-        const uint8_t *getExplsImg(byte bildNum);
+        const uint8_t *getDigImg(uint8_t num) const;
         const uint8_t *getMenusImg(byte bildNum);
         const uint8_t *getMenusNextFigImg(byte bildNum);
         const uint8_t *getFieldPartsImg(uint16_t fieldCode);

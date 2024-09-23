@@ -8,7 +8,6 @@ namespace Tetris
 
     void Gfx::drawScr()
     {
-
         display.display();
         display.clearDisplay();
     }
@@ -17,19 +16,19 @@ namespace Tetris
     {
         for (byte i = 0; i < 3; i++)
         {
-            display.drawBitmap(i * 24 + 16, 10, getMenusImg(i), 18, 18, 1);
+            display.drawBitmap((2-i) * 24 + 16, 10, getMenusImg(i), 18, 18, 1);
         }
-        byte xCor = (selected - 1) * 24 + 9 + 16;
+        byte xCor = 48-(selected - 1) * 24 + 9 + 16;
         display.fillTriangle(xCor - 6, 01, xCor + 6, 01, xCor, 07, WHITE);
-        display.setCursor(45, 30);
-        display.print(speed);
+        printDigital(speed, 45, 30);
+
     }
     void Gfx::drawPauseMenu(byte selected)
     {
 
         display.drawBitmap(40, 10, getMenusImg(10), 18, 18, 1);
         display.drawBitmap(64, 10, getMenusImg(2), 18, 18, 1);
-        byte xCor = (selected - 1) * 24 + 9 + 40;
+        byte xCor = 24-(selected - 1) * 24 + 9 + 40;
         display.fillTriangle(xCor - 6, 01, xCor + 6, 01, xCor, 07, WHITE);
     }
 
@@ -68,13 +67,66 @@ namespace Tetris
 
     void Gfx::drawScore(unsigned long score)
     {
-        display.setCursor(5,54);
-        display.println(score);
+        // display.setCursor(5, 54);
+        // display.println(score);
+        printDigital(score, 120, 55);
     }
 
     void Gfx::drawNextFig(byte figNum)
     {
-        display.drawBitmap(103, 54, getMenusNextFigImg(figNum),16,16,1);
+        display.drawBitmap(103, 54, getMenusNextFigImg(figNum), 16, 16, 1);
+    }
+
+    void Gfx::printDigital(unsigned long dig, int x, int y) const
+    {
+        uint8_t printable = 0;
+        while (dig > 10)
+        {
+            printable = dig % 10;
+            dig = dig / 10;
+            display.drawBitmap(x, y, getDigImg(printable), 7, 5, 1);
+            y = y - 6;
+        }
+        printable = dig;
+        display.drawBitmap(x, y, getDigImg(printable), 7, 5, 1);
+    }
+
+    const uint8_t *Gfx::getDigImg(uint8_t num) const
+    {
+        switch (num)
+        {
+        case 0:
+            return dig0;
+            break;
+        case 1:
+            return dig1;
+            break;
+        case 2:
+            return dig2;
+            break;
+        case 3:
+            return dig3;
+            break;
+        case 4:
+            return dig4;
+            break;
+        case 5:
+            return dig5;
+            break;
+        case 6:
+            return dig6;
+            break;
+        case 7:
+            return dig7;
+            break;
+        case 8:
+            return dig8;
+            break;
+        case 9:
+            return dig9;
+            break;
+        }
+        return dig0;
     }
 
     const uint8_t *Gfx::getMenusImg(byte bildNum)

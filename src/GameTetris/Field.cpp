@@ -70,19 +70,13 @@ bool Tetris::GameField::collisionControlSite(uint8_t *arr, int xInField, int yIn
 
 int Tetris::GameField::figureDown(uint8_t *arr, int xInField, int yInField)
 {
-    //bool a[6];
     int contactLvl = 0;
     for (uint8_t i = 0; i < arr[5]; i++)
     {
         for (byte pos = 0; pos < arr[4]; pos++)
         {
-           // if (a[pos])
-           // {
-          //      continue;
-          //  }
             if (arr[i] & (1 << pos))
             {
-               // a[pos] = true;
                 for (int fi = lvl; fi > -1; fi--)
                 {
                     if (fi < 0 || field[fi] & (1 << (xInField + pos)))
@@ -100,12 +94,10 @@ int Tetris::GameField::figureDown(uint8_t *arr, int xInField, int yInField)
 byte Tetris::GameField::checkFullLinies()
 {
     byte count = 0;
-    for (byte i = 0; i < lvl; i++)
+    for (byte i = 0; i <= lvl; i++)
     {
         if (field[i] == 1023)
         {
-            Serial.print("fullstr ");
-            Serial.println(i);
             field[i] = 5119;
             count++;
         }

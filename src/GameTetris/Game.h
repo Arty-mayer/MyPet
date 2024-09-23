@@ -6,7 +6,7 @@
 #include "../../MP_Game.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "../GameTetris/Field.h"
+#include "Field.h"
 #include <MemoryFree.h>
 
 #include "Shape_I.h"
@@ -91,7 +91,7 @@ namespace Tetris
         uint8_t figureCount = 7;
         uint8_t nextFigure;
         unsigned long gameScore=0;
-        unsigned int stepTime=1000;
+        unsigned int stepTime;
 
         bool downpressed = false ;
         unsigned long minusLiniesCount = 0;
@@ -104,7 +104,7 @@ namespace Tetris
         Menu *menu = nullptr;
         Timer timerFrame = Timer(50);
         Timer timerGameStep = Timer (1000);
-        Timer timerFigureDown = Timer (300);
+        Timer timerFigureDown = Timer (500);
         
 
         Gfx gfx = Gfx();
